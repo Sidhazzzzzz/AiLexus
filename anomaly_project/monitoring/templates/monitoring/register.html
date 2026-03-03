@@ -1,0 +1,667 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AILEXUS — Register</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'monitoring/images/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'monitoring/images/favicon-32.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'monitoring/images/logo-180.png' %}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'monitoring/css/dashboard.css' %}?v=2">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            cursor: none !important;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .auth-container {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: staggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-logo {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-logo img {
+            width: 72px;
+            height: 72px;
+            border-radius: 16px;
+            filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.5)) drop-shadow(0 0 40px rgba(139, 92, 246, 0.3));
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.4)) drop-shadow(0 0 30px rgba(139, 92, 246, 0.2));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 25px rgba(6, 182, 212, 0.7)) drop-shadow(0 0 50px rgba(139, 92, 246, 0.4));
+            }
+        }
+
+        .auth-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .auth-form input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: none !important;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            width: 100%;
+            padding-right: 40px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 4px !important;
+            cursor: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password svg {
+            width: 28px;
+            height: 28px;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            filter: drop-shadow(0 0 0px transparent);
+        }
+
+        .toggle-password:hover svg {
+            filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.5)) drop-shadow(0 0 20px rgba(6, 182, 212, 0.2));
+            transform: scale(1.12);
+        }
+
+        /* Biometric rings */
+        .bio-ring {
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-origin: center;
+        }
+
+        .toggle-password.is-hidden .bio-ring {
+            opacity: 0.15;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-ring {
+            opacity: 0.7;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-ring-1 {
+            animation: ringPulse 2.5s ease-in-out infinite;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-ring-2 {
+            animation: ringPulse 2.5s ease-in-out 0.3s infinite;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-ring-3 {
+            animation: ringPulse 2.5s ease-in-out 0.6s infinite;
+        }
+
+        /* Iris */
+        .bio-iris {
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-origin: center;
+        }
+
+        .toggle-password.is-hidden .bio-iris {
+            fill: #475569;
+            r: 2;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-iris {
+            fill: #06b6d4;
+            r: 3;
+            filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.8));
+        }
+
+        /* Pupil */
+        .bio-pupil {
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-origin: center;
+        }
+
+        .toggle-password.is-hidden .bio-pupil {
+            r: 0.8;
+            opacity: 0.5;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-pupil {
+            r: 1.3;
+            opacity: 1;
+        }
+
+        /* Eye shape */
+        .bio-eye-outline {
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .toggle-password.is-hidden .bio-eye-outline {
+            stroke: #475569;
+            opacity: 0.5;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-eye-outline {
+            stroke: #06b6d4;
+            opacity: 0.9;
+        }
+
+        .toggle-password:hover .bio-eye-outline {
+            stroke: #22d3ee;
+        }
+
+        /* Scan sweep */
+        .bio-scan {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-scan {
+            opacity: 1;
+            animation: bioSweep 2s linear infinite;
+        }
+
+        /* Lid line for hidden state */
+        .bio-lid {
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            stroke-dasharray: 24;
+        }
+
+        .toggle-password.is-hidden .bio-lid {
+            stroke-dashoffset: 0;
+            stroke: #64748b;
+            opacity: 0.8;
+        }
+
+        .toggle-password:not(.is-hidden) .bio-lid {
+            stroke-dashoffset: 24;
+            opacity: 0;
+        }
+
+        @keyframes ringPulse {
+
+            0%,
+            100% {
+                opacity: 0.25;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.08);
+            }
+        }
+
+        @keyframes bioSweep {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .auth-form button[type="submit"] {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            cursor: none !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .auth-form button[type="submit"]:hover {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .auth-links a {
+            color: #0ea5e9;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s;
+            text-shadow: 0 0 8px rgba(14, 165, 233, 0.3);
+        }
+
+        .auth-links a:hover {
+            color: #38bdf8;
+            text-decoration: underline;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+        }
+
+        .auth-error {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        #warp-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Velocity Tech Scanner Cursor -->
+    <div id="tech-cursor-dot"></div>
+    <div id="tech-cursor-scanner">
+        <div class="bracket tl"></div>
+        <div class="bracket tr"></div>
+        <div class="bracket bl"></div>
+        <div class="bracket br"></div>
+    </div>
+
+    <!-- Backgrounds -->
+    <canvas id="warp-canvas"></canvas>
+    <div class="bg-glow"></div>
+    <div class="bg-glow-2"></div>
+
+    <div class="auth-container">
+        <div class="auth-logo"><img src="{% static 'monitoring/images/logo.png' %}" alt="AILEXUS">
+        </div>
+        <div class="auth-title"
+            style="font-family:'Orbitron',sans-serif;font-weight:800;letter-spacing:3px;color:#cbd5e1;"><span
+                style="background:linear-gradient(135deg,#fcd34d,#f59e0b,#b45309,#78350f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">AILEXUS</span>
+            Node</div>
+
+        <form id="register-form" class="auth-form" method="POST" action="{% url 'register' %}" autocomplete="off">
+            {% csrf_token %}
+            {% if error %}
+            <div class="auth-error">{{ error }}</div>
+            {% endif %}
+            <input type="text" name="username" placeholder="Choose Username" required autofocus autocomplete="off">
+            <div class="password-wrapper">
+                <input type="password" id="password-input" name="password" placeholder="Create Password" required
+                    autocomplete="new-password">
+                <button type="button" class="toggle-password is-hidden" id="toggle-password-btn"
+                    aria-label="Show password" title="Show password">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path class="bio-eye-outline"
+                            d="M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12C22 12 18.5 19 12 19C5.5 19 2 12 2 12Z"
+                            stroke="#475569" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"
+                            fill="none" />
+                        <circle class="bio-ring bio-ring-1" cx="12" cy="12" r="6" stroke="#06b6d4" stroke-width="0.4"
+                            fill="none" opacity="0.15" />
+                        <circle class="bio-ring bio-ring-2" cx="12" cy="12" r="4.5" stroke="#06b6d4" stroke-width="0.5"
+                            fill="none" opacity="0.15" />
+                        <circle class="bio-ring bio-ring-3" cx="12" cy="12" r="3" stroke="#22d3ee" stroke-width="0.6"
+                            fill="none" opacity="0.15" />
+                        <circle class="bio-iris" cx="12" cy="12" r="2" fill="#475569" />
+                        <circle class="bio-pupil" cx="12" cy="12" r="0.8" fill="#0a0e1c" />
+                        <path class="bio-scan" d="M12 7 A5 5 0 0 1 17 12" stroke="#22d3ee" stroke-width="0.8"
+                            fill="none" stroke-linecap="round" style="transform-origin:12px 12px" />
+                        <line class="bio-lid" x1="2" y1="12" x2="22" y2="12" stroke="#64748b" stroke-width="1.5"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+            <div class="password-wrapper">
+                <input type="password" id="confirm-password-input" name="confirm_password"
+                    placeholder="Confirm Password" required autocomplete="new-password">
+                <button type="button" class="toggle-password is-hidden" id="toggle-confirm-btn"
+                    aria-label="Show password" title="Show password">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path class="bio-eye-outline"
+                            d="M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12C22 12 18.5 19 12 19C5.5 19 2 12 2 12Z"
+                            stroke="#475569" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"
+                            fill="none" />
+                        <circle class="bio-ring bio-ring-1" cx="12" cy="12" r="6" stroke="#06b6d4" stroke-width="0.4"
+                            fill="none" opacity="0.15" />
+                        <circle class="bio-ring bio-ring-2" cx="12" cy="12" r="4.5" stroke="#06b6d4" stroke-width="0.5"
+                            fill="none" opacity="0.15" />
+                        <circle class="bio-ring bio-ring-3" cx="12" cy="12" r="3" stroke="#22d3ee" stroke-width="0.6"
+                            fill="none" opacity="0.15" />
+                        <circle class="bio-iris" cx="12" cy="12" r="2" fill="#475569" />
+                        <circle class="bio-pupil" cx="12" cy="12" r="0.8" fill="#0a0e1c" />
+                        <path class="bio-scan" d="M12 7 A5 5 0 0 1 17 12" stroke="#22d3ee" stroke-width="0.8"
+                            fill="none" stroke-linecap="round" style="transform-origin:12px 12px" />
+                        <line class="bio-lid" x1="2" y1="12" x2="22" y2="12" stroke="#64748b" stroke-width="1.5"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+            <button type="submit">Establish Connection</button>
+        </form>
+
+        <div class="auth-links">
+            Already authenticated? <a href="{% url 'login' %}">Login</a>
+        </div>
+    </div>
+
+    <script>
+        // ─── 1. TECH CURSOR & PARTICLES ───
+        const tCursorDot = document.getElementById('tech-cursor-dot');
+        const tCursorScanner = document.getElementById('tech-cursor-scanner');
+        let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+        let scannerX = mouseX, scannerY = mouseY;
+        let lastMouseX = mouseX, lastMouseY = mouseY;
+        let isHovering = false;
+
+        document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+        function animateTechCursor() {
+            if (tCursorDot && tCursorScanner) {
+                tCursorDot.style.left = mouseX + 'px';
+                tCursorDot.style.top = mouseY + 'px';
+
+                scannerX += (mouseX - scannerX) * 0.2;
+                scannerY += (mouseY - scannerY) * 0.2;
+
+                const dx = mouseX - lastMouseX;
+                const dy = mouseY - lastMouseY;
+                const speed = Math.min(Math.sqrt(dx * dx + dy * dy) * 0.5, 20);
+
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+
+                tCursorScanner.style.left = scannerX + 'px';
+                tCursorScanner.style.top = scannerY + 'px';
+
+                if (speed > 1 && !isHovering) {
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    const stretch = 1 + (speed * 0.04);
+                    const squish = 1 - (speed * 0.015);
+                    tCursorScanner.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scale(${stretch}, ${Math.max(0.6, squish)})`;
+                    tCursorScanner.classList.remove('spin');
+                } else {
+                    tCursorScanner.style.transform = `translate(-50%, -50%)`;
+                    if (isHovering) tCursorScanner.classList.add('spin');
+                    else tCursorScanner.classList.remove('spin');
+                }
+            }
+            requestAnimationFrame(animateTechCursor);
+        }
+        animateTechCursor();
+
+        document.addEventListener('mouseover', e => {
+            const t = e.target.closest('button, input, a, .toggle-password');
+            if (t && tCursorScanner && tCursorDot) {
+                isHovering = true;
+                if (t.tagName.toLowerCase() === 'input') {
+                    tCursorDot.classList.add('text-mode');
+                    tCursorScanner.classList.add('text-mode');
+                } else {
+                    tCursorDot.classList.add('hand-mode');
+                    tCursorScanner.classList.add('hand-mode');
+                }
+            }
+        });
+        document.addEventListener('mouseout', e => {
+            if (!e.target.closest('button, input, a, .toggle-password') && tCursorScanner && tCursorDot) {
+                isHovering = false;
+                tCursorDot.classList.remove('hand-mode', 'cross-mode', 'text-mode');
+                tCursorScanner.classList.remove('hand-mode', 'cross-mode', 'text-mode');
+            }
+        });
+
+        // Background Particles
+        for (let i = 0; i < 35; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 4 + 2;
+            p.style.width = p.style.height = size + 'px';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.top = Math.random() * 100 + 'vh';
+            p.style.animationDuration = (Math.random() * 20 + 15) + 's';
+            p.style.animationDelay = (Math.random() * -20) + 's';
+            const colors = ['#f59e0b', '#fbbf24', '#fcd34d', '#8b5cf6'];
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            p.style.opacity = Math.random() * 0.15 + 0.05;
+            document.body.appendChild(p);
+        }
+
+        // ─── 2. WARP SPEED CANVAS ANIMATION ───
+        const form = document.getElementById('register-form');
+        const container = document.querySelector('.auth-container');
+        const canvas = document.getElementById('warp-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // 3D Black Hole Accretion Disk System
+        let stars = [];
+        const numStars = 1000;
+        let speedMultiplier = 1;
+        let rotationAngle = 0;
+        let isWarping = false;
+
+        const voidRadius = 80;
+
+        class Star {
+            constructor() {
+                this.reset(true);
+            }
+            reset(randomZ = false) {
+                const radius = voidRadius + Math.random() * (canvas.width / 1.5);
+                const theta = Math.random() * Math.PI * 2;
+
+                this.x = radius * Math.cos(theta);
+                this.y = radius * Math.sin(theta);
+                this.z = randomZ ? Math.random() * canvas.width : canvas.width;
+                this.pz = this.z;
+
+                const colors = ['#f59e0b', '#fb923c', '#ef4444', '#8b5cf6', '#06b6d4'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.z -= (10 * speedMultiplier);
+
+                const currentDist = Math.sqrt(this.x * this.x + this.y * this.y);
+                if (currentDist > voidRadius) {
+                    const pull = speedMultiplier * 0.5;
+                    this.x -= (this.x / currentDist) * pull;
+                    this.y -= (this.y / currentDist) * pull;
+                }
+
+                if (this.z < 1) {
+                    this.reset(false);
+                }
+            }
+            draw() {
+                const cosA = Math.cos(rotationAngle);
+                const sinA = Math.sin(rotationAngle);
+
+                let rx = this.x * cosA - this.y * sinA;
+                let ry = this.x * sinA + this.y * cosA;
+
+                let sx = (rx / this.z) * canvas.width + canvas.width / 2;
+                let sy = (ry / this.z) * canvas.height + canvas.height / 2;
+
+                this.pz = this.z + (10 * speedMultiplier * 2);
+                let prx = this.x * cosA - this.y * sinA;
+                let pry = this.x * sinA + this.y * cosA;
+                let px = (prx / this.pz) * canvas.width + canvas.width / 2;
+                let py = (pry / this.pz) * canvas.height + canvas.height / 2;
+
+                let size = Math.max(0.5, (1 - this.z / canvas.width) * 5);
+
+                ctx.beginPath();
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = size;
+                ctx.lineCap = 'round';
+                ctx.moveTo(px, py);
+                ctx.lineTo(sx, sy);
+                ctx.stroke();
+            }
+        }
+
+        for (let i = 0; i < numStars; i++) stars.push(new Star());
+
+        function animateWarp() {
+            if (!isWarping) return;
+
+            ctx.fillStyle = `rgba(10, 10, 14, ${Math.max(0.08, 0.4 - speedMultiplier / 60)})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            speedMultiplier *= 1.05;
+            rotationAngle += (0.004 * speedMultiplier);
+
+            stars.forEach(s => {
+                s.update();
+                s.draw();
+            });
+
+            if (speedMultiplier > 25) {
+                stars.forEach(s => {
+                    if (Math.random() > 0.6) s.color = '#06b6d4';
+                    else if (Math.random() > 0.9) s.color = '#fcd34d';
+                });
+
+                ctx.fillStyle = `rgba(0, 0, 0, 0.5)`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            requestAnimationFrame(animateWarp);
+        }
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // 1. Shrink/Fade the register box
+            container.style.transition = 'all 0.8s cubic-bezier(0.8, -0.5, 0.2, 1.4)';
+            container.style.transform = 'scale(0.1) translateZ(-1000px)';
+            container.style.opacity = '0';
+
+            // 2. Hide everything else (backgrounds/particles)
+            document.querySelectorAll('.bg-glow, .bg-glow-2, .particle').forEach(el => el.style.opacity = 0);
+
+            // 3. Trigger Warp Engine
+            canvas.style.opacity = 1;
+            isWarping = true;
+            animateWarp();
+
+            // 4. Force actual registration after hyperspace completes
+            setTimeout(() => {
+                form.submit();
+            }, 1600);
+        });
+
+        // ─── 3. SHOW PASSWORD TOGGLES ───
+        function setupToggle(btnId, inputId) {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            if (btn && input) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    if (type === 'text') {
+                        this.classList.remove('is-hidden');
+                        this.setAttribute('title', 'Hide password');
+                        this.setAttribute('aria-label', 'Hide password');
+                    } else {
+                        this.classList.add('is-hidden');
+                        this.setAttribute('title', 'Show password');
+                        this.setAttribute('aria-label', 'Show password');
+                    }
+                });
+            }
+        }
+        setupToggle('toggle-password-btn', 'password-input');
+        setupToggle('toggle-confirm-btn', 'confirm-password-input');
+    </script>
+
+</body>
+
+</html>

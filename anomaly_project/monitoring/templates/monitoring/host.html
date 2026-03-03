@@ -1,0 +1,38 @@
+{% load static %}
+<!doctype html>
+<html>
+
+<head>
+    <title> Network and System anomaly detection </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'monitoring/images/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'monitoring/images/favicon-32.png' %}">
+</head>
+
+<body>
+    <h1> Hosts </h1>
+    <ul> <a href="/anomalies/"> View anomalies </a> </ul>
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th> Host </th>
+                <th> Last seen </th>
+                <th> Status </th>
+                <th> CPU </th>
+                <th> Ram </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td> <a href="/hosts/{{row.host.id}}/">{{row.host.hostname}} </a> </td>
+                <td> {{row.host.last_seen}} </td>
+                <td> {{row.status}} </td>
+                <td> {% if row.latest %} {{row.latest.cpu}}% {% endif %} </td>
+                <td> {% if row.latest %} {{row.latest.ram}}% {% endif %} </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -1,0 +1,40 @@
+{% load static %}
+<!doctype html>
+<html>
+
+<head>
+    <title> Anomalies </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'monitoring/images/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'monitoring/images/favicon-32.png' %}">
+</head>
+
+<body>
+    <h1> All Anomalies </h1>
+    <p> <a href="/hosts/"> Back to Hosts </a> </p>
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th> Host </th>
+                <th> Time </th>
+                <th> Metric </th>
+                <th> Value </th>
+                <th> Severity </th>
+                <th> Reason </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in events %}
+            <tr>
+                <td> {{e.host.hostname}} </td>
+                <td> {{e.timestamp}} </td>
+                <td> {{e.metric_name}} </td>
+                <td> {{e.value}} </td>
+                <td> {{e.severity}} </td>
+                <td> {{e.reason}} </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

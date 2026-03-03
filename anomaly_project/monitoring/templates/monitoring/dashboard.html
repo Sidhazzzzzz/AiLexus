@@ -1,0 +1,262 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AILEXUS — Network Anomaly Detection</title>
+    <meta name="description" content="AILEXUS real-time network and system anomaly detection dashboard">
+    <!-- Open Graph / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="AILEXUS — Network Anomaly Detection & Monitoring">
+    <meta property="og:description"
+        content="Real-time device health monitoring with z-score anomaly detection, website uptime tracking, and Discord/Slack webhook alerts.">
+    <meta property="og:image" content="{% static 'monitoring/images/logo.png' %}">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AILEXUS — Network Anomaly Detection & Monitoring">
+    <meta name="twitter:description"
+        content="Real-time device health monitoring with z-score anomaly detection, website uptime tracking, and webhook alerts.">
+
+    <link rel="icon" type="image/x-icon" href="{% static 'monitoring/images/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'monitoring/images/favicon-32.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'monitoring/images/logo-180.png' %}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'monitoring/css/dashboard.css' %}?v=7">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Velocity Tech Scanner Cursor -->
+    <div id="tech-cursor-dot"></div>
+    <div id="tech-cursor-scanner">
+        <div class="bracket tl"></div>
+        <div class="bracket tr"></div>
+        <div class="bracket bl"></div>
+        <div class="bracket br"></div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="bg-glow"></div>
+    <div class="bg-glow-2"></div>
+
+    <div class="hyper-exit-box">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon"><img src="{% static 'monitoring/images/logo.png' %}" alt="AILEXUS"
+                        style="width:36px;height:36px;border-radius:8px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(6,182,212,0.4));">
+                </div>
+                <div class="brand-text"
+                    style="font-family:'Orbitron',sans-serif;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,#fcd34d,#f59e0b,#b45309,#78350f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                    <span style="font-size:1.1em;">A</span>ILEXUS
+                </div>
+            </div>
+            <div class="top-stats">
+                <span class="top-alert-badge" id="top-alert-count" style="display:none;">0 alerts</span>
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span id="live-time"
+                        style="font-family:'JetBrains Mono'; font-weight:700; font-size:0.9rem;">00:00:00</span>
+                </div>
+                <button class="nav-btn" style="padding: 6px 14px; font-size:0.9rem;" onclick="openWebhook()">🔗
+                    Integrations</button>
+                <a href="{% url 'logout' %}" style="text-decoration:none;" title="Logout">
+                    <button class="nav-btn" style="padding: 6px 14px; font-size:0.9rem;">🔌 Logout</button>
+                </a>
+            </div>
+        </header>
+
+        <main class="container">
+            <!-- Navigation -->
+            <nav class="nav">
+                <button class="nav-btn active" data-tab="hosts" onclick="switchTab('hosts')">🖥️ Devices</button>
+                <button class="nav-btn" data-tab="detail" id="detail-tab" style="display:none;"
+                    onclick="switchTab('detail')">📊 <span id="detail-tab-lbl">Host</span></button>
+                <button class="nav-btn" data-tab="websites" onclick="switchTab('websites')">🌐 Websites</button>
+                <button class="nav-btn" data-tab="advice" onclick="switchTab('advice')">🩺 Advice</button>
+                <button class="nav-btn" data-tab="anomalies" onclick="switchTab('anomalies')">🔔 Alerts <span
+                        class="nav-badge" id="alert-badge">0</span></button>
+            </nav>
+
+            <!-- ─── TAB 1: DEVICES ─── -->
+            <div class="panel active" id="panel-hosts">
+                <div class="toolbar">
+                    <div>
+                        <div class="section-title">Connected Devices</div>
+                        <div class="section-subtitle">Real-time system health across your infrastructure</div>
+                    </div>
+                    <button class="btn-primary" onclick="openAddDevice()">+ Add Device</button>
+                </div>
+                <div class="grid-cards" id="host-grid"></div>
+            </div>
+
+            <!-- ─── TAB 2: HOST DETAIL ─── -->
+            <div class="panel" id="panel-detail">
+                <div class="detail-header">
+                    <div class="section-title" style="margin:0;">📊 Host Detail</div>
+                    <button class="btn-secondary" onclick="switchTab('hosts')">← Back to Devices</button>
+                </div>
+
+                <div class="health-banner">
+                    <div class="health-ring-wrap">
+                        <canvas id="dh-ring"></canvas>
+                        <div class="health-score" id="dh-score">0</div>
+                    </div>
+                    <div class="health-bars">
+                        <div class="hbar-row">
+                            <div class="hbar-lbl">CPU</div>
+                            <div class="hbar-track">
+                                <div class="hbar-fill" id="hb-cpu-fill"></div>
+                            </div>
+                            <div class="hbar-val" id="hb-cpu-val">0%</div>
+                        </div>
+                        <div class="hbar-row">
+                            <div class="hbar-lbl">RAM</div>
+                            <div class="hbar-track">
+                                <div class="hbar-fill" id="hb-ram-fill"></div>
+                            </div>
+                            <div class="hbar-val" id="hb-ram-val">0%</div>
+                        </div>
+                        <div class="hbar-row">
+                            <div class="hbar-lbl">Disk</div>
+                            <div class="hbar-track">
+                                <div class="hbar-fill" id="hb-disk-fill"></div>
+                            </div>
+                            <div class="hbar-val" id="hb-disk-val">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gauges" id="dgauges"></div>
+
+                <div class="section-title" style="margin-top: 15px; font-size: 0.9rem; color: var(--text-2);">🔥 Top
+                    Resource Consuming Processes</div>
+                <div id="dprocs" style="display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;"></div>
+
+                <div class="charts">
+                    <div class="chart-box">
+                        <div class="section-title">⚡ CPU & RAM</div>
+                        <div class="c-area"><canvas id="c1"></canvas></div>
+                    </div>
+                    <div class="chart-box">
+                        <div class="section-title">🌐 Disk & Network</div>
+                        <div class="c-area"><canvas id="c2"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── TAB 3: WEBSITES ─── -->
+            <div class="panel" id="panel-websites">
+                <div class="toolbar">
+                    <div>
+                        <div class="section-title">Website Monitoring</div>
+                        <div class="section-subtitle">Uptime, response times, and SSL health</div>
+                    </div>
+                    <button class="btn-primary" onclick="openAddWeb()">+ Add Website</button>
+                </div>
+                <div class="grid-cards" id="web-grid"></div>
+            </div>
+
+            <!-- ─── TAB 4: ADVICE ─── -->
+            <div class="panel" id="panel-advice">
+                <div class="toolbar">
+                    <div>
+                        <div class="section-title">🩺 Health Recommendations</div>
+                        <div class="section-subtitle">AI-powered diagnostics with step-by-step action plans</div>
+                    </div>
+                </div>
+                <div id="adv-list"></div>
+            </div>
+
+            <!-- ─── TAB 5: ALERTS ─── -->
+            <div class="panel" id="panel-anomalies">
+                <div class="toolbar">
+                    <div>
+                        <div class="section-title">🔔 Alert Log</div>
+                        <div class="section-subtitle">Detected anomalies across all monitored systems</div>
+                    </div>
+                </div>
+                <div id="alert-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ─── MODALS ─── -->
+    <div class="modal-overlay" id="modal-device">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Add New Device</div>
+                <button class="close-btn" onclick="closeAddDevice()">×</button>
+            </div>
+            <div class="modal-desc">
+                Register a new device to automatically download your pre-configured Python agent script.
+                <br><br>
+                <strong style="color:var(--text);font-size:0.85rem;">How to run without an IDE (VS Code):</strong>
+                <ol
+                    style="margin-top:8px; margin-left: 18px; color: var(--text-2); font-size: 0.8rem; line-height: 1.5;">
+                    <li>Install <a href="https://python.org" target="_blank" style="color:var(--brand-3);">Python 3</a>
+                    </li>
+                    <li>Open <strong>Command Prompt</strong> or Terminal</li>
+                    <li>Type <code>pip install psutil requests</code></li>
+                    <li>Type <code>python path/to/ailexus_agent_<span id="lbl-ph">name</span>.py</code></li>
+                </ol>
+            </div>
+            <div class="input-group">
+                <label>Hostname</label>
+                <input type="text" id="inp-hostname" placeholder="e.g. database-server-01">
+            </div>
+            <button class="btn-primary" id="btn-add-dev" style="width:100%" onclick="submitDevice()">Download Agent
+                Script</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-web">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Monitor Website</div>
+                <button class="close-btn" onclick="closeAddWeb()">×</button>
+            </div>
+            <div class="modal-desc">Track uptime, response time, and SSL health for any URL.</div>
+            <div class="input-group">
+                <label>Friendly Name</label>
+                <input type="text" id="inp-wname" placeholder="e.g. Production API">
+            </div>
+            <div class="input-group">
+                <label>URL</label>
+                <input type="text" id="inp-wurl" placeholder="https://example.com">
+            </div>
+            <div class="input-group">
+                <label>Expected Keyword (Optional)</label>
+                <input type="text" id="inp-wkeyword" placeholder="e.g. Welcome">
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Site is marked DOMN if keyword is
+                    missing.</div>
+            </div>
+            <button class="btn-primary" style="width:100%" onclick="submitWeb()">Start Monitoring</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-webhook">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Off-Platform Alerts</div>
+                <button class="close-btn" onclick="closeWebhook()">×</button>
+            </div>
+            <div class="modal-desc">Paste your Discord or Slack Webhook URL. We will ping you instantly if the Anomaly
+                Engine detects a Critical systemic failure. Leave blank to disable.</div>
+            <div class="input-group">
+                <label>Webhook URL</label>
+                <input type="text" id="inp-webhook" placeholder="https://discord.com/api/webhooks/...">
+            </div>
+            <button class="btn-primary" style="width:100%" onclick="submitWebhook()">Save Integration</button>
+        </div>
+    </div>
+
+    <script src="{% static 'monitoring/js/dashboard.js' %}?v=5"></script>
+</body>
+
+</html>

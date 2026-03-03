@@ -1,0 +1,70 @@
+{% load static %}
+<!doctype html>
+<html>
+
+<head>
+    <title> Host details </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'monitoring/images/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'monitoring/images/favicon-32.png' %}">
+</head>
+
+<body>
+    <h1> Host: {{host.hostname}} </h1>
+    <p>
+        <a href="/hosts/"> Back </a> | <a href="/anomalies/"> All anomalies </a>
+    </p>
+    <h2> Recent anomalies </h2>
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th> Time </th>
+                <th> Metric </th>
+                <th> Value </th>
+                <th> Severity </th>
+                <th> Reason </th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for e in events %}
+            <tr>
+                <td> {{e.timestamp}} </td>
+                <td> {{e.metric_name}} </td>
+                <td> {{e.value}} </td>
+                <td> {{e.severity}} </td>
+                <td> {{e.reason}} </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2> Recent Samples </h2>
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th> Time </th>
+                <th> CPU </th>
+                <th> Ram </th>
+                <th> Disk </th>
+                <th> Net Send </th>
+                <th> Net received </th>
+                <th> Ping in ms </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in samples %}
+            <tr>
+                <td> {{s.timestamp}} </td>
+                <td> {{s.cpu}}% </td>
+                <td> {{s.ram}}% </td>
+                <td> {{s.disk}}% </td>
+                <td> {{s.net_sent}} </td>
+                <td> {{s.net_recv}} </td>
+                <td> {{s.ping_ms}} </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
